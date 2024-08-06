@@ -49,10 +49,11 @@ const LoginForm = () => {
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
         } else {
-            // Check if email already exists
-            axios.get(`https://66a1e9a6967c89168f1e00a0.mockapi.io/login-form?email=${formData.email}`)
+            // Fetch all users to check for existing email
+            axios.get('https://66a1e9a6967c89168f1e00a0.mockapi.io/login-form')
                 .then(response => {
-                    if (response.data.length > 0) {
+                    const userExists = response.data.some(user => user.email === formData.email);
+                    if (userExists) {
                         setErrors({ email: 'Email already exists' });
                     } else {
                         // Handle form submission
@@ -71,7 +72,7 @@ const LoginForm = () => {
                     }
                 })
                 .catch(error => {
-                    console.error('There was an error checking email existence!', error);
+                    console.error('There was an error fetching user data!', error);
                 });
         }
     };
@@ -92,7 +93,6 @@ const LoginForm = () => {
                     <InputGroup className="mb-3">
                         <InputGroup.Text><LuUser2 /></InputGroup.Text>
                         <Form.Control
-                            className="right-border-r"
                             type="text"
                             name="name"
                             placeholder="Enter Your Name"
@@ -109,7 +109,6 @@ const LoginForm = () => {
                     <InputGroup className="mb-3">
                         <InputGroup.Text><TfiEmail /></InputGroup.Text>
                         <Form.Control
-                            className="right-border-r"
                             type="email"
                             name="email"
                             placeholder="Enter Your Email"
@@ -133,7 +132,7 @@ const LoginForm = () => {
                             onChange={handleChange}
                             isInvalid={!!errors.password}
                         />
-                        <InputGroup.Text className="right-border-r" onClick={togglePasswordVisibility}>
+                        <InputGroup.Text style={{ cursor: 'pointer' }} onClick={togglePasswordVisibility}>
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </InputGroup.Text>
                         <Form.Control.Feedback type="invalid">
@@ -152,7 +151,7 @@ const LoginForm = () => {
                             onChange={handleChange}
                             isInvalid={!!errors.confirmPassword}
                         />
-                        <InputGroup.Text className="right-border-r" onClick={toggleConfirmPasswordVisibility}>
+                        <InputGroup.Text style={{ cursor: 'pointer' }} onClick={toggleConfirmPasswordVisibility}>
                             {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                         </InputGroup.Text>
                         <Form.Control.Feedback type="invalid">
@@ -165,6 +164,8 @@ const LoginForm = () => {
                             required
                             name="terms"
                             label="I agree to the all Terms & Conditions"
+                            isInvalid={!!errors.terms}
+                            feedback={errors.terms}
                         />
                     </Form.Group>
 
